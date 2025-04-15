@@ -204,7 +204,7 @@ partial class Program
                         weapons = weapons.Where(w => LegendaryLocations.Contains(w.Location)).ToList();
                     }
 
-                    if (legendaryGenerationMatch != null)
+                    if (legendaryGenerationMatch.Success)
                     {
                         var group = legendaryGenerationMatch.Groups[^1];
                         switch (group.Value)
