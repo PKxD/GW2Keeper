@@ -6,7 +6,7 @@ import { Home } from './pages/Home/index.jsx';
 import { NotFound } from './pages/_404.jsx';
 import './style.css';
 
-export const ROUTER_PREFIX = (new URL(import.meta.url.replace("src/", ""))).pathname.match(/.*\//)[0];
+export const ROUTER_PREFIX = (new URL(import.meta.url.replace("src/", "").replace("assets/",""))).pathname.match(/.*\//)[0];
 export function urlPath(path: string) {
 	console.log(ROUTER_PREFIX, );
 	return ROUTER_PREFIX + path.replace(/^\//, '');
