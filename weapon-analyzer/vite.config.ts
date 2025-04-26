@@ -6,7 +6,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [preact(), tsconfigPaths()],
-    base: "GW2Keeper",
+    base: "/GW2Keeper",
     test: {
         environment: 'jsdom',
         globals: true,

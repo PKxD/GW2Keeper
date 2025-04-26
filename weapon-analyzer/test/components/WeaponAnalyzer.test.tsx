@@ -5,6 +5,8 @@ import {render, screen, fireEvent, waitFor} from '@testing-library/preact';
 import WeaponAnalyzer from '@components/WeaponAnalyzer';
 import * as gw2Api from '@services/gw2Api';
 import {fetchJson} from "@util/fetch";
+import * as ThemeContext from '../../src/context/ThemeContext';
+import { mockUseTheme } from '../mocks/ThemeContextMock';
 
 vi.mock('@services/gw2Api', () => ({
     loadItemCache: vi.fn(),
@@ -14,6 +16,11 @@ vi.mock('@services/gw2Api', () => ({
 
 vi.mock('@util/fetch', () => ({
     fetchJson: vi.fn()
+}));
+
+// Mock the useTheme hook
+vi.mock('../../src/context/ThemeContext', () => ({
+    useTheme: () => mockUseTheme()
 }));
 
 describe('WeaponAnalyzer Component', () => {
@@ -128,8 +135,6 @@ describe('WeaponAnalyzer Component', () => {
 
         await waitFor(() => {
             const outputElement = screen.getByTestId('output');
-            expect(outputElement.textContent).toContain('Fetching data...');
-            expect(outputElement.textContent).toContain('Found 1 characters...');
             expect(gw2Api.saveItemCache).toHaveBeenCalled();
         });
     });

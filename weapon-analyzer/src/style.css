@@ -3,15 +3,13 @@
 	line-height: 1.5;
 	font-weight: 400;
 
-	color: #222;
-	background-color: #ffffff;
-
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-text-size-adjust: 100%;
 
+	/* Dark mode variables (default) */
 	--bg-primary: #1e1e2e;
 	--bg-secondary: #282838;
 	--bg-tertiary: #313145;
@@ -25,11 +23,29 @@
 	--danger-color: #ff5555;
 	--danger-color-hover: #d43c3c;
 	--shadow-color: rgba(0, 0, 0, 0.4);
+}
 
+/* Light mode variables */
+.light-mode {
+	--bg-primary: #f5f5f7;
+	--bg-secondary: #e8e8ec;
+	--bg-tertiary: #dcdce0;
+	--text-primary: #333344;
+	--text-secondary: #555566;
+	--border-color: #ccccdd;
+	--accent-color: #4477cc;
+	--accent-color-hover: #3366bb;
+	--success-color: #33aa55;
+	--success-color-hover: #229944;
+	--danger-color: #dd3333;
+	--danger-color-hover: #cc2222;
+	--shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 body {
 	margin: 0;
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
 }
 
 #app {
@@ -40,8 +56,10 @@ body {
 
 header {
 	display: flex;
-	justify-content: flex-end;
+	justify-content: space-between;
+	align-items: center;
 	background-color: #673ab8;
+	padding: 0 1rem;
 }
 
 header nav {
@@ -62,6 +80,16 @@ header a:hover {
 	background-color: #0008;
 }
 
+header .theme-toggle-container {
+	margin: 0;
+}
+
+header .theme-toggle {
+	background-color: rgba(255, 255, 255, 0.2);
+	color: #fff;
+	border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
 main {
 	flex: auto;
 	display: flex;
@@ -76,14 +104,6 @@ main {
 		margin: 2rem;
 	}
 }
-
-@media (prefers-color-scheme: dark) {
-	:root {
-		color: #ccc;
-		background-color: #1a1a1a;
-	}
-}
-
 
 .weapon-analyzer {
 	display: flex;
@@ -201,6 +221,34 @@ button:focus {
 	box-shadow: 0 0 0 2px rgba(130, 170, 255, 0.4);
 }
 
+/* Theme toggle styles */
+.theme-toggle-container {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 15px;
+}
+
+.theme-toggle {
+	background-color: var(--accent-color);
+	color: #000;
+	padding: 8px 16px;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border: none;
+}
+
+.theme-toggle:hover {
+	background-color: var(--accent-color-hover);
+	transform: translateY(-1px);
+}
+
+.theme-toggle:active {
+	transform: translateY(1px);
+}
+
 #runButton {
 	grid-column: 1 / -1;
 	justify-self: start;
@@ -274,6 +322,176 @@ button[data-testid="forget-key-button"]:hover {
 	background-color: #4a4a6a;
 }
 
+/* Styles for the tabbed layout */
+.loading {
+	padding: 20px;
+	text-align: center;
+	font-size: 18px;
+	color: var(--text-secondary);
+	background-color: var(--bg-secondary);
+	border-radius: 6px;
+	border: 1px solid var(--border-color);
+}
+
+.character-tabs {
+	display: flex;
+	flex-direction: column;
+	background-color: var(--bg-secondary);
+	border-radius: 6px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px var(--shadow-color);
+	border: 1px solid var(--border-color);
+}
+
+.tab-headers {
+	display: flex;
+	overflow-x: auto;
+	background-color: var(--bg-tertiary);
+	border-bottom: 1px solid var(--border-color);
+}
+
+.tab-header {
+	padding: 12px 20px;
+	cursor: pointer;
+	font-weight: 500;
+	color: var(--text-secondary);
+	transition: all 0.2s ease;
+	white-space: nowrap;
+	border-right: 1px solid var(--border-color);
+}
+
+.tab-header:hover {
+	background-color: rgba(130, 170, 255, 0.1);
+	color: var(--text-primary);
+}
+
+.tab-header.active {
+	background-color: var(--accent-color);
+	color: #000;
+}
+
+.tab-content {
+	padding: 20px;
+}
+
+.character-templates {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.character-templates h3 {
+	margin-top: 0;
+	margin-bottom: 10px;
+	color: var(--text-primary);
+	border-bottom: 1px solid var(--border-color);
+	padding-bottom: 10px;
+}
+
+.template {
+	background-color: var(--bg-tertiary);
+	border-radius: 6px;
+	padding: 15px;
+	border: 1px solid var(--border-color);
+}
+
+.template h4 {
+	margin-top: 0;
+	margin-bottom: 15px;
+	color: var(--text-primary);
+	border-bottom: 1px solid var(--border-color);
+	padding-bottom: 8px;
+}
+
+.items {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+	gap: 15px;
+}
+
+.item {
+	display: flex;
+	align-items: center;
+	background-color: var(--bg-primary);
+	border-radius: 4px;
+	padding: 10px;
+	border: 1px solid var(--border-color);
+	transition: all 0.2s ease;
+}
+
+.item:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+.item-icon {
+	width: 32px;
+	height: 32px;
+	margin-right: 12px;
+	border-radius: 4px;
+	background-color: var(--bg-tertiary);
+	border: 1px solid var(--border-color);
+}
+
+.item-details {
+	flex: 1;
+	text-align: left;
+}
+
+.item-name {
+	font-weight: 500;
+	color: var(--text-primary);
+	margin-bottom: 4px;
+}
+
+.item-type {
+	font-size: 12px;
+	color: var(--text-secondary);
+}
+
+.weapon-counts {
+	margin-top: 20px;
+	background-color: var(--bg-secondary);
+	border-radius: 6px;
+	padding: 15px;
+	box-shadow: 0 2px 8px var(--shadow-color);
+	border: 1px solid var(--border-color);
+}
+
+.weapon-counts h3 {
+	margin-top: 0;
+	margin-bottom: 15px;
+	color: var(--text-primary);
+	border-bottom: 1px solid var(--border-color);
+	padding-bottom: 10px;
+}
+
+.counts {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 10px;
+}
+
+.count {
+	background-color: var(--bg-tertiary);
+	border-radius: 4px;
+	padding: 10px;
+	border: 1px solid var(--border-color);
+	text-align: center;
+}
+
+.count-type {
+	font-weight: 500;
+	color: var(--text-primary);
+	margin-bottom: 5px;
+}
+
+.count-value {
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--accent-color);
+}
+
 /* Media queries for responsive design */
 @media (max-width: 768px) {
 	.settings {
@@ -282,5 +500,32 @@ button[data-testid="forget-key-button"]:hover {
 
 	.weapon-analyzer {
 		padding: 15px;
+	}
+
+	.items {
+		grid-template-columns: 1fr;
+	}
+
+	.counts {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.tab-header {
+		padding: 10px 15px;
+		font-size: 14px;
+	}
+}
+
+@media (max-width: 480px) {
+	.counts {
+		grid-template-columns: 1fr;
+	}
+
+	.tab-content {
+		padding: 15px 10px;
+	}
+
+	.template {
+		padding: 10px;
 	}
 }
