@@ -1,438 +1,394 @@
-import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
-import {
-    loadItemCache,
-    saveItemCache,
-    loadLegendaryItems
-} from '@services/gw2Api';
+import React, { useState, useEffect, useRef } from 'react';
+import { loadItemCache, saveItemCache, loadLegendaryItems } from '@services/gw2Api';
 import { fetchJson } from '@util/fetch';
-import {
-    ItemCache,
-    WeaponCounts,
-    CharacterItemDict,
-    EquipmentTab,
-    EquipmentItem,
-    Item
-} from '@types/gw2Types';
+import { ItemCache, WeaponCounts, CharacterItemDict, EquipmentTab, EquipmentItem } from '@types/gw2Types';
 
-// Define interfaces for our new data structure
 type CharacterTemplate = {
-    name: string;
-    items: {
-        id: number;
-        name: string;
-        type: string;
-        icon?: string;
-    }[];
-}
+	name: string;
+	items: {
+		id: number;
+		name: string;
+		type: string;
+		icon?: string;
+	}[];
+};
 
 type CharacterData = {
-    name: string;
-    templates: CharacterTemplate[];
-}
+	name: string;
+	templates: CharacterTemplate[];
+};
 
 type WeaponTypeCount = {
-    type: string;
-    count: number;
-    ids: number[];
-}
+	type: string;
+	count: number;
+};
 
 const WeaponAnalyzer: React.FC = () => {
-    const [apiKey, setApiKey] = useState<string>('');
-    const [saveKey, setSaveKey] = useState<boolean>(false);
-    const [noLegendary, setNoLegendary] = useState<boolean>(false);
-    const [onlyLegendary, setOnlyLegendary] = useState<boolean>(false);
-    const [legendaryGeneration, setLegendaryGeneration] = useState<string>('');
-    const [output, setOutput] = useState<string>('');
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [characters, setCharacters] = useState<CharacterData[]>([]);
-    const [weaponCounts, setWeaponCounts] = useState<WeaponTypeCount[]>([]);
-    const [activeCharacterIndex, setActiveCharacterIndex] = useState<number>(0);
-    const outputRef = useRef<HTMLPreElement>(null);
+	const [apiKey, setApiKey] = useState<string>('');
+	const [saveKey, setSaveKey] = useState<boolean>(false);
+	const [noLegendary, setNoLegendary] = useState<boolean>(false);
+	const [onlyLegendary, setOnlyLegendary] = useState<boolean>(false);
+	const [legendaryGeneration, setLegendaryGeneration] = useState<string>('');
+	const [output, setOutput] = useState<string>('');
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [characters, setCharacters] = useState<CharacterData[]>([]);
+	const [weaponCounts, setWeaponCounts] = useState<WeaponTypeCount[]>([]);
+	const [activeCharacterIndex, setActiveCharacterIndex] = useState<number>(0);
+	const outputRef = useRef<HTMLPreElement>(null);
 
-    useEffect(() => {
-        // Load API key from localStorage
-        const storedApiKey = localStorage.getItem('apiKey');
-        if (storedApiKey) {
-            setApiKey(storedApiKey);
-            setSaveKey(true);
-        }
-    }, []);
+	useEffect(() => {
+		const storedApiKey = localStorage.getItem('apiKey');
+		if (storedApiKey) {
+			setApiKey(storedApiKey);
+			setSaveKey(true);
+		}
+	}, []);
 
-    useEffect(() => {
-        if (outputRef.current) {
-            outputRef.current.scrollTop = outputRef.current.scrollHeight;
-        }
-    }, [output]);
+	useEffect(() => {
+		if (outputRef.current) {
+			outputRef.current.scrollTop = outputRef.current.scrollHeight;
+		}
+	}, [output]);
 
-    const appendOutput = (text: string): void => {
-        setOutput(prevOutput => prevOutput + text);
-    };
+	const appendOutput = (text: string): void => {
+		setOutput(prev => prev + text);
+	};
 
-    const forgetApiKey = (): void => {
-        localStorage.removeItem('apiKey');
-        setSaveKey(false);
-        setApiKey('');
-    };
+	const forgetApiKey = (): void => {
+		localStorage.removeItem('apiKey');
+		setSaveKey(false);
+		setApiKey('');
+	};
 
-    const handleApiKeyChange = (e: ChangeEvent<HTMLInputElement>): void => {
-        setApiKey(e.target.value);
-    };
+	const analyzeWeapons = async (): Promise<void> => {
+		if (!apiKey) {
+			alert('API Key is required.');
+			return;
+		}
 
-    const handleCheckboxChange = (
-        setter: React.Dispatch<React.SetStateAction<boolean>>
-    ) => (e: ChangeEvent<HTMLInputElement>): void => {
-        setter(e.target.checked);
-    };
+		if (saveKey) {
+			localStorage.setItem('apiKey', apiKey);
+		}
 
-    const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>): void => {
-        setLegendaryGeneration(e.target.value);
-    };
+		if (onlyLegendary && noLegendary) {
+			alert('Incompatible legendary armory option.');
+			return;
+		}
 
-    const analyzeWeapons = async (): Promise<void> => {
-        if (!apiKey) {
-            alert('API Key is required.');
-            return;
-        }
+		setOutput('');
+		setCharacters([]);
+		setWeaponCounts([]);
+		setIsLoading(true);
+		appendOutput('Fetching data...\n');
 
-        if (saveKey) {
-            localStorage.setItem('apiKey', apiKey);
-        }
+		try {
+			const itemCache: ItemCache = await loadItemCache();
+			const legendaryItems = await loadLegendaryItems(apiKey);
+			const characterNames = await fetchJson<string[]>(`characters?access_token=${apiKey}`);
 
-        if (onlyLegendary && noLegendary) {
-            alert('Incompatible legendary armory option.');
-            return;
-        }
+			if (!characterNames || characterNames.length === 0) {
+				appendOutput('No characters found.\n');
+				setIsLoading(false);
+				return;
+			}
 
-        setOutput('Fetching data...\n');
-        setIsLoading(true);
-        setCharacters([]);
-        setWeaponCounts([]);
+			appendOutput(`Found ${characterNames.length} characters...\n`);
 
-        try {
-            const itemCache: ItemCache = await loadItemCache();
-            const legendaryItems = await loadLegendaryItems(apiKey);
-            const characterNames = await fetchJson<string[]>(`characters?access_token=${apiKey}`);
+			const counts: WeaponCounts = {};
+			const itemIds: number[] = [];
+			const charItemDict: CharacterItemDict = {};
+			const promises: Promise<void>[] = [];
+			const newCharacters: CharacterData[] = [];
 
-            if (!characterNames || characterNames.length === 0) {
-                appendOutput('No characters found.\n');
-                return;
-            }
+			for (const charName of characterNames) {
+				appendOutput(`Processing character: ${charName}\n`);
+				const processCharacter = fetchJson<EquipmentTab[]>(
+					`characters/${encodeURIComponent(charName)}/equipmenttabs?tabs=all&access_token=${apiKey}`
+				).then(charData => {
+					const templates: CharacterTemplate[] = [];
+					let templateId = 1;
 
-            appendOutput(`Found ${characterNames.length} characters...\n`);
+					for (const tab of charData) {
+						const name = tab.name || `Template ${templateId}`;
+						if (!tab.equipment) continue;
 
-            const weaponCounts: WeaponCounts = {};
-            const itemIds: number[] = [];
-            const charItemDict: CharacterItemDict = {};
-            const characterPromises: Promise<void>[] = [];
-            const newCharacters: CharacterData[] = [];
+						let items = tab.equipment.filter(
+							item => item.slot.includes('Weapon') && !item.slot.includes('Aquatic')
+						);
 
-            for (const charName of characterNames) {
-                appendOutput(`Fetching data for character ${charName}...\n`);
-                const currentCharacterProcess = fetchJson<EquipmentTab[]>(
-                    `characters/${encodeURIComponent(charName)}/equipmenttabs?tabs=all&access_token=${apiKey}`
-                ).then(charData => {
-                    const characterTemplates: CharacterTemplate[] = [];
-                    let templateId = 1;
+						if (noLegendary) {
+							items = items.filter(
+								item => !['EquippedFromLegendaryArmory', 'LegendaryArmory'].includes(item.location)
+							);
+						}
 
-                    for (const equipmentTab of charData) {
-                        const name = equipmentTab.name || templateId.toString();
-                        appendOutput(`Processing Equipment Template ${name} in character ${charName}...\n`);
+						if (onlyLegendary) {
+							items = items.filter(
+								item => ['EquippedFromLegendaryArmory', 'LegendaryArmory'].includes(item.location)
+							);
+						}
 
-                        if (!equipmentTab.equipment) continue;
+						if (legendaryGeneration && legendaryItems[legendaryGeneration]) {
+							items = items.filter(
+								item => legendaryItems[legendaryGeneration].includes(item.id)
+							);
+						}
 
-                        let items: EquipmentItem[] = equipmentTab.equipment.filter(
-                            item => item.slot.includes('Weapon') && !item.slot.includes('Aquatic')
-                        );
+						items.forEach(item => itemIds.push(item.id));
 
-                        appendOutput(`Found ${items.length} weapons...\n`);
+						if (!charItemDict[charName]) {
+							charItemDict[charName] = [];
+						}
+						charItemDict[charName].push(...items.map(item => ({ itemId: item.id, template: name })));
 
-                        if (noLegendary) {
-                            items = items.filter(
-                                item => !['EquippedFromLegendaryArmory', 'LegendaryArmory'].includes(item.location)
-                            );
-                        }
+						templates.push({
+							name,
+							items: items.map(item => ({
+								id: item.id,
+								name: '',
+								type: '',
+								icon: ''
+							}))
+						});
+						templateId++;
+					}
 
-                        if (onlyLegendary) {
-                            items = items.filter(
-                                item => ['EquippedFromLegendaryArmory', 'LegendaryArmory'].includes(item.location)
-                            );
-                        }
+					if (templates.length > 0) {
+						newCharacters.push({ name: charName, templates });
+					}
+				});
+				promises.push(processCharacter);
+			}
 
-                        if (legendaryGeneration && legendaryItems[legendaryGeneration]) {
-                            items = items.filter(
-                                item => legendaryItems[legendaryGeneration].includes(item.id)
-                            );
-                        }
+			await Promise.all(promises);
 
-                        // Add items to the global list for fetching
-                        items.forEach(item => itemIds.push(item.id));
+			const uniqueItems = Array.from(new Set(itemIds));
+			const itemsInCache = new Set(Object.keys(itemCache));
+			const itemsToFetch = uniqueItems.filter(id => !itemsInCache.has(id.toString()));
 
-                        // Add items to the character dictionary (for backward compatibility)
-                        if (!charItemDict[charName]) {
-                            charItemDict[charName] = [];
-                        }
+			if (itemsToFetch.length > 0) {
+				appendOutput(`Fetching ${itemsToFetch.length} items from API...\n`);
+				const itemsFromApi = await fetchJson<any[]>(`items?ids=${itemsToFetch.join(',')}&access_token=${apiKey}`);
+				itemsFromApi.forEach(item => {
+					itemCache[item.id.toString()] = item;
+				});
+			}
 
-                        charItemDict[charName].push(
-                            ...items.map(item => ({ itemId: item.id, template: name }))
-                        );
+			// Count weapons
+			itemIds.forEach(itemId => {
+				const item = itemCache[itemId.toString()];
+				if (item?.details?.type) {
+					const weaponType = item.details.type;
+					if (!counts[weaponType]) {
+						counts[weaponType] = { count: 0, ids: [] };
+					}
+					counts[weaponType].count++;
+					counts[weaponType].ids.push(itemId);
+				}
+			});
 
-                        // Create a template object for our new data structure
-                        const template: CharacterTemplate = {
-                            name,
-                            items: items.map(item => ({
-                                id: item.id,
-                                name: '', // Will be filled later when we have item details
-                                type: '',
-                                icon: ''
-                            }))
-                        };
+			const newWeaponCounts: WeaponTypeCount[] = Object.entries(counts).map(([type, data]) => ({
+				type,
+				count: data.count
+			}));
 
-                        characterTemplates.push(template);
-                        templateId++;
-                    }
+			newWeaponCounts.forEach(({ type, count }) => {
+				appendOutput(`${type}: ${count} equipped\n`);
+			});
 
-                    // Add the character to our new data structure
-                    if (characterTemplates.length > 0) {
-                        newCharacters.push({
-                            name: charName,
-                            templates: characterTemplates
-                        });
-                    }
-                });
+			// Fill in item details
+			for (const character of newCharacters) {
+				for (const template of character.templates) {
+					for (let i = 0; i < template.items.length; i++) {
+						const itemId = template.items[i].id;
+						const item = itemCache[itemId.toString()];
+						if (item) {
+							template.items[i].name = item.name;
+							template.items[i].type = item.details?.type || '';
+							template.items[i].icon = item.icon || '';
+						}
+					}
+				}
+			}
 
-                characterPromises.push(currentCharacterProcess);
-            }
+			await saveItemCache(itemCache);
+			setCharacters(newCharacters);
+			setWeaponCounts(newWeaponCounts);
+			setIsLoading(false);
+			appendOutput('\nDone!\n');
+		} catch (error) {
+			if (error instanceof Error) {
+				appendOutput(`Error: ${error.message}\n`);
+			} else {
+				appendOutput('Unknown error occurred\n');
+			}
+			setIsLoading(false);
+		}
+	};
 
-            await Promise.all(characterPromises);
+	return (
+		<div className="weapon-analyzer">
+			<h2>🗡️ Guild Wars 2 Weapon Analyzer</h2>
+			<p className="subtitle">Analyze weapon usage across your characters' equipment templates</p>
 
-            const uniqueItems = Array.from(new Set(itemIds));
-            const itemsInCache = new Set(Object.keys(itemCache));
-            const itemsToFetch = uniqueItems.filter(
-                itemId => !itemsInCache.has(itemId.toString())
-            );
+			<div className="settings">
+				<h3>Settings</h3>
+				<div className="form-grid">
+					<div className="form-group full-width">
+						<label htmlFor="apiKey">API Key</label>
+						<input
+							type="text"
+							id="apiKey"
+							value={apiKey}
+							onChange={e => setApiKey(e.target.value)}
+							placeholder="Enter your Guild Wars 2 API key"
+						/>
+					</div>
 
-            if (itemsToFetch.length > 0) {
-                appendOutput(`Fetching ${itemsToFetch.length} items from API...\n`);
-                const itemsFromApi = await fetchJson<any[]>(
-                    `items?ids=${itemsToFetch.join(',')}&access_token=${apiKey}`
-                );
+					<div className="form-group">
+						<label>Options</label>
+						<div className="checkbox-group">
+							<div className="checkbox-item">
+								<input
+									type="checkbox"
+									id="saveKey"
+									checked={saveKey}
+									onChange={e => setSaveKey(e.target.checked)}
+								/>
+								<label htmlFor="saveKey">Save API Key</label>
+							</div>
+							<div className="checkbox-item">
+								<input
+									type="checkbox"
+									id="noLegendary"
+									checked={noLegendary}
+									onChange={e => setNoLegendary(e.target.checked)}
+								/>
+								<label htmlFor="noLegendary">Exclude Legendary</label>
+							</div>
+							<div className="checkbox-item">
+								<input
+									type="checkbox"
+									id="onlyLegendary"
+									checked={onlyLegendary}
+									onChange={e => setOnlyLegendary(e.target.checked)}
+								/>
+								<label htmlFor="onlyLegendary">Only Legendary</label>
+							</div>
+						</div>
+					</div>
 
-                itemsFromApi.forEach(item => {
-                    itemCache[item.id.toString()] = item;
-                });
-            }
+					<div className="form-group">
+						<label htmlFor="legendaryGeneration">Legendary Generation</label>
+						<select
+							id="legendaryGeneration"
+							value={legendaryGeneration}
+							onChange={e => setLegendaryGeneration(e.target.value)}
+						>
+							<option value="">All Generations</option>
+							<option value="1">Gen 1</option>
+							<option value="2">Gen 2</option>
+							<option value="3">Gen 3</option>
+							<option value="3_5">Gen 3.5</option>
+						</select>
+					</div>
 
-            // Process weapon counts for the summary
-            const newWeaponCounts: WeaponTypeCount[] = [];
-            itemIds.forEach(itemId => {
-                const item = itemCache[itemId.toString()];
-                if (item && item.details && item.details.type) {
-                    const weaponType = item.details.type;
-                    if (!weaponCounts[weaponType]) {
-                        weaponCounts[weaponType] = { count: 1, ids: [item.id] };
-                    } else {
-                        weaponCounts[weaponType].count++;
-                        weaponCounts[weaponType].ids = [...weaponCounts[weaponType].ids, item.id];
-                    }
-                }
-            });
+					<div className="form-group full-width">
+						<div className="action-row">
+							<button
+								id="runButton"
+								className="btn btn-success"
+								onClick={analyzeWeapons}
+								disabled={isLoading}
+							>
+								{isLoading ? 'Analyzing...' : '🚀 Analyze Weapons'}
+							</button>
+							{saveKey && (
+								<button className="btn btn-danger" onClick={forgetApiKey}>
+									🗑️ Forget API Key
+								</button>
+							)}
+						</div>
+					</div>
+				</div>
+			</div>
 
-            // Convert weaponCounts to array for state
-            for (const [weaponType, count] of Object.entries(weaponCounts)) {
-                newWeaponCounts.push({
-                    type: weaponType,
-                    count: count.count,
-                    ids: count.ids
-                });
-                appendOutput(`The weapon type '${weaponType}' is equipped ${count.count} times across all characters.\n`);
-            }
+			{isLoading ? (
+				<div className="loading">
+					<div className="loading-spinner"></div>
+					<p>Analyzing your characters...</p>
+				</div>
+			) : (
+				<>
+					{characters.length > 0 && (
+						<div className="character-tabs">
+							<div className="tab-headers">
+								{characters.map((character, index) => (
+									<div
+										key={character.name}
+										className={`tab-header ${index === activeCharacterIndex ? 'active' : ''}`}
+										onClick={() => setActiveCharacterIndex(index)}
+									>
+										{character.name}
+									</div>
+								))}
+							</div>
+							<div className="tab-content">
+								{characters[activeCharacterIndex] && (
+									<div className="character-templates">
+										<h3>{characters[activeCharacterIndex].name}'s Templates</h3>
+										{characters[activeCharacterIndex].templates.map((template, idx) => (
+											<div key={idx} className="template">
+												<h4>{template.name}</h4>
+												<div className="items">
+													{template.items.map((item, itemIdx) => (
+														<div key={itemIdx} className="item">
+															{item.icon && (
+																<img
+																	src={item.icon}
+																	alt={item.name}
+																	className="item-icon"
+																/>
+															)}
+															<div className="item-details">
+																<div className="item-name">{item.name}</div>
+																<div className="item-type">{item.type}</div>
+															</div>
+														</div>
+													))}
+												</div>
+											</div>
+										))}
+									</div>
+								)}
+							</div>
+						</div>
+					)}
 
-            // Update the item details in our new data structure
-            for (const character of newCharacters) {
-                for (const template of character.templates) {
-                    for (let i = 0; i < template.items.length; i++) {
-                        const itemId = template.items[i].id;
-                        const item = itemCache[itemId.toString()];
-                        if (item) {
-                            template.items[i].name = item.name;
-                            template.items[i].type = item.details?.type || '';
-                            template.items[i].icon = item.icon || '';
-                        }
-                    }
-                }
-            }
+					{weaponCounts.length > 0 && (
+						<div className="weapon-counts">
+							<h3>Weapon Type Summary</h3>
+							<div className="counts">
+								{weaponCounts.map(({ type, count }) => (
+									<div key={type} className="count">
+										<div className="count-type">{type}</div>
+										<div className="count-value">{count}</div>
+									</div>
+								))}
+							</div>
+						</div>
+					)}
 
-
-            await saveItemCache(itemCache);
-
-            // Update state with our new data
-            setCharacters(newCharacters);
-            setWeaponCounts(newWeaponCounts);
-            setIsLoading(false);
-
-            appendOutput('\nDone!\n');
-
-        } catch (error) {
-            if (error instanceof Error) {
-                appendOutput(`Error: ${error.message}\n`);
-            } else {
-                appendOutput(`Unknown error occurred\n`);
-            }
-            setIsLoading(false);
-        }
-    };
-
-    // Function to handle character tab selection
-    const handleCharacterTabClick = (index: number) => {
-        setActiveCharacterIndex(index);
-    };
-
-    return (
-        <div className={`weapon-analyzer`} data-testid="weapon-analyzer">
-            <div className="settings">
-                <div className="form-group">
-                    <label htmlFor="apiKey">API Key:</label>
-                    <input
-                        type="text"
-                        id="apiKey"
-                        data-testid="api-key-input"
-                        value={apiKey}
-                        onChange={handleApiKeyChange}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>
-                        <input
-                            type="checkbox"
-                            id="saveKey"
-                            data-testid="save-key-checkbox"
-                            checked={saveKey}
-                            onChange={handleCheckboxChange(setSaveKey)}
-                        />
-                        Save API Key
-                    </label>
-                    <button onClick={forgetApiKey} data-testid="forget-key-button">Forget API Key</button>
-                </div>
-
-                <div className="form-group">
-                    <label>
-                        <input
-                            type="checkbox"
-                            id="noLegendary"
-                            data-testid="no-legendary-checkbox"
-                            checked={noLegendary}
-                            onChange={handleCheckboxChange(setNoLegendary)}
-                        />
-                        Exclude Legendary Items
-                    </label>
-                </div>
-
-                <div className="form-group">
-                    <label>
-                        <input
-                            type="checkbox"
-                            id="onlyLegendary"
-                            data-testid="only-legendary-checkbox"
-                            checked={onlyLegendary}
-                            onChange={handleCheckboxChange(setOnlyLegendary)}
-                        />
-                        Only Legendary Items
-                    </label>
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="legendaryGeneration">Legendary Generation:</label>
-                    <select
-                        id="legendaryGeneration"
-                        data-testid="legendary-generation-select"
-                        value={legendaryGeneration}
-                        onChange={handleSelectChange}
-                    >
-                        <option value="">All</option>
-                        <option value="1">Gen 1</option>
-                        <option value="2">Gen 2</option>
-                        <option value="3">Gen 3</option>
-                        <option value="3_5">Gen 3.5</option>
-                    </select>
-                </div>
-
-                <button id="runButton" data-testid="analyze-button" onClick={analyzeWeapons}>Analyze Weapons</button>
-            </div>
-
-            {isLoading ? (
-                <div className="loading">Loading data...</div>
-            ) : (
-                <>
-                    {characters.length > 0 ? (
-                        <div className="character-tabs" data-testid="output">
-                            <div className="tab-headers">
-                                {characters.map((character, index) => (
-                                    <div 
-                                        key={character.name} 
-                                        className={`tab-header ${index === activeCharacterIndex ? 'active' : ''}`}
-                                        onClick={() => handleCharacterTabClick(index)}
-                                    >
-                                        {character.name}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="tab-content">
-                                {characters[activeCharacterIndex] && (
-                                    <div className="character-templates">
-                                        <h3>{characters[activeCharacterIndex].name}'s Templates</h3>
-                                        {characters[activeCharacterIndex].templates.map(template => (
-                                            <div key={template.name} className="template">
-                                                <h4>Template: {template.name}</h4>
-                                                <div className="items">
-                                                    {template.items.map(item => (
-                                                        <div key={item.id} className="item">
-                                                            {item.icon && (
-                                                                <img 
-                                                                    src={item.icon} 
-                                                                    alt={item.name} 
-                                                                    className="item-icon" 
-                                                                />
-                                                            )}
-                                                            <div className="item-details">
-                                                                <div className="item-name">{item.name}</div>
-                                                                <div className="item-type">{item.type}</div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ) : (
-                        output && (
-                            <div className="output-container">
-                                <h3>Output:</h3>
-                                <pre id="output" data-testid="output" ref={outputRef}>{output}</pre>
-                            </div>
-                        )
-                    )}
-
-                    {weaponCounts.length > 0 && (
-                        <div className="weapon-counts">
-                            <h3>Weapon Type Summary</h3>
-                            <div className="counts">
-                                {weaponCounts.map(count => (
-                                    <div key={count.type} className="count">
-                                        <div className="count-type">{count.type}</div>
-                                        <div className="count-value">{count.count}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </>
-            )}
-        </div>
-    );
+					{output && (
+						<div className="output-container">
+							<h3>Console Output</h3>
+							<pre id="output" ref={outputRef}>{output}</pre>
+						</div>
+					)}
+				</>
+			)}
+		</div>
+	);
 };
 
 export default WeaponAnalyzer;
