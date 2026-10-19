@@ -168,10 +168,20 @@ const WeaponAnalyzer: React.FC = () => {
 
 			if (itemsToFetch.length > 0) {
 				appendOutput(`Fetching ${itemsToFetch.length} items from API...\n`);
-				const itemsFromApi = await fetchJson<any[]>(`items?ids=${itemsToFetch.join(',')}&access_token=${apiKey}`);
-				itemsFromApi.forEach(item => {
-					itemCache[item.id.toString()] = item;
-				});
+				// GW2 API only allows 200 IDs per request, batch them
+				const BATCH_SIZE = 200;
+				const batches = [];
+				for (let i = 0; i < itemsToFetch.length; i += BATCH_SIZE) {
+					batches.push(itemsToFetch.slice(i, i + BATCH_SIZE));
+				}
+				for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+					const batch = batches[batchIndex];
+					appendOutput(`  Batch ${batchIndex + 1}/${batches.length} (${batch.length} items)...\n`);
+					const itemsFromApi = await fetchJson<any[]>(`items?ids=${batch.join(',')}&access_token=${apiKey}`);
+					itemsFromApi.forEach(item => {
+						itemCache[item.id.toString()] = item;
+					});
+				}
 			}
 
 			// Count weapons
