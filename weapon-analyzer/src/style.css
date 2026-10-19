@@ -70,42 +70,35 @@ body {
 	flex-direction: column;
 }
 
-header {
+.app-layout {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.app-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1rem 2rem;
 	background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%);
-	padding: 0;
+	box-shadow: var(--shadow-md);
 	position: sticky;
 	top: 0;
 	z-index: 100;
-	box-shadow: var(--shadow-md);
 }
 
-header nav {
-	max-width: 1280px;
-	margin: 0 auto;
-	padding: 0 1.5rem;
+.app-title {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-}
-
-header a {
+	gap: 0.5rem;
 	color: #fff;
-	text-decoration: none;
-	font-weight: 700;
 	font-size: 1.25rem;
-	padding: 1rem 0;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
+	font-weight: 700;
 }
 
-header a:hover {
-	opacity: 0.9;
-}
-
-.theme-toggle-container {
-	display: flex;
-	gap: 0.5rem;
+.app-icon {
+	font-size: 1.5rem;
 }
 
 .theme-toggle {
