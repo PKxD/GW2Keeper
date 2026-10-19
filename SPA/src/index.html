@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guild Wars 2 API Tool</title>
+    <link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+<div class="container">
+    <h1>Vibe Coded - Guild Wars 2 API Tool</h1>
+    <div>
+        <div class="apikey-container">
+            <div class="apikey">
+                <label for="apiKey">API Key:</label>
+                <input type="text" id="apiKey" placeholder="Enter your API key">
+            </div>
+        </div>
+            <div class="remember">
+                <label for="saveKey">Remember?</label>
+                <input type="checkbox" id="saveKey">
+        </div>
+    </div>
+    <div class="options">
+        <label>
+            <input type="checkbox" id="noLegendary"> Skip Legendary Armory
+        </label>
+        <label>
+            <input type="checkbox" id="onlyLegendary"> Only Legendary
+        </label>
+        <label>
+            <input type="checkbox" id="characterDetails"> Show Character Details
+        </label>
+        <label>
+            Legendary Generation:
+            <select id="legendaryGeneration">
+                <option value="">None</option>
+                <option value="1">Gen 1</option>
+                <option value="2">Gen 2</option>
+                <option value="3">Gen 3</option>
+                <option value="3_5">Gen 3.5</option>
+            </select>
+        </label>
+    </div>
+    <div>
+        <button id="runButton">Run</button>
+        <button id="forgetApiKeyButton" onclick="forgetApiKey()">Forget API Key</button>
+    </div>
+    <pre id="output"></pre>
+</div>
+<script src="app/app.js"></script>
+</body>
+</html>

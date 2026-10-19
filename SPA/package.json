@@ -1,0 +1,16 @@
+{
+  "name": "gw2-keeper",
+  "version": "1.0.0",
+  "description": "Simple tool to check what weapons are used across your Guild Wars 2 Account.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "http-server ./src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
