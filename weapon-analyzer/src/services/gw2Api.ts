@@ -41,10 +41,17 @@ export async function loadLegendaryItems(apiKey: string): Promise<LegendaryItems
         `legendaryarmory?ids=all&access_token=${apiKey}`
     );
 
-    const legendaryItemIds = legendaryArmory.map(item => item.id).join(',');
-    const legendaryItems = await fetchJson<Item[]>(
-        `items?ids=${legendaryItemIds}&access_token=${apiKey}`
-    );
+    const legendaryItemIds = legendaryArmory.map(item => item.id);
+    // GW2 API only allows 200 IDs per request, batch them
+    const BATCH_SIZE = 200;
+    const legendaryItems: Item[] = [];
+    for (let i = 0; i < legendaryItemIds.length; i += BATCH_SIZE) {
+        const batch = legendaryItemIds.slice(i, i + BATCH_SIZE);
+        const batchItems = await fetchJson<Item[]>(
+            `items?ids=${batch.join(',')}&access_token=${apiKey}`
+        );
+        legendaryItems.push(...batchItems);
+    }
 
     const filteredItems = legendaryItems
         .filter(item => item.type === 'Weapon')
