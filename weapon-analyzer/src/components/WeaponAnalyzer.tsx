@@ -250,6 +250,7 @@ const WeaponAnalyzer: React.FC = () => {
 						<input
 							type="password"
 							id="apiKey"
+							data-testid="api-key-input"
 							value={apiKey}
 							onChange={e => setApiKey(e.target.value)}
 							placeholder="Enter your Guild Wars 2 API key"
@@ -263,6 +264,7 @@ const WeaponAnalyzer: React.FC = () => {
 								<input
 									type="checkbox"
 									id="saveKey"
+									data-testid="save-key-checkbox"
 									checked={saveKey}
 									onChange={e => setSaveKey(e.target.checked)}
 								/>
@@ -272,6 +274,7 @@ const WeaponAnalyzer: React.FC = () => {
 								<input
 									type="checkbox"
 									id="noLegendary"
+									data-testid="no-legendary-checkbox"
 									checked={noLegendary}
 									onChange={e => setNoLegendary(e.target.checked)}
 								/>
@@ -281,6 +284,7 @@ const WeaponAnalyzer: React.FC = () => {
 								<input
 									type="checkbox"
 									id="onlyLegendary"
+									data-testid="only-legendary-checkbox"
 									checked={onlyLegendary}
 									onChange={e => setOnlyLegendary(e.target.checked)}
 								/>
@@ -293,6 +297,7 @@ const WeaponAnalyzer: React.FC = () => {
 						<label htmlFor="legendaryGeneration">Legendary Generation</label>
 						<select
 							id="legendaryGeneration"
+							data-testid="legendary-generation-select"
 							value={legendaryGeneration}
 							onChange={e => setLegendaryGeneration(e.target.value)}
 						>
@@ -308,6 +313,7 @@ const WeaponAnalyzer: React.FC = () => {
 						<div className="action-row">
 							<button
 								id="runButton"
+								data-testid="analyze-button"
 								className="btn btn-success"
 								onClick={analyzeWeapons}
 								disabled={isLoading}
@@ -315,7 +321,7 @@ const WeaponAnalyzer: React.FC = () => {
 								{isLoading ? 'Analyzing...' : 'Analyze Weapons'}
 							</button>
 							{saveKey && (
-								<button className="btn btn-danger" onClick={forgetApiKey}>
+								<button className="btn btn-danger" data-testid="forget-key-button" onClick={forgetApiKey}>
 									Forget API Key
 								</button>
 							)}
@@ -396,7 +402,7 @@ const WeaponAnalyzer: React.FC = () => {
 						</button>
 						{showConsole && output && (
 							<div className="output-container">
-								<pre id="output" ref={outputRef}>{output}</pre>
+								<pre id="output" data-testid="output" ref={outputRef}>{output}</pre>
 							</div>
 						)}
 					</div>

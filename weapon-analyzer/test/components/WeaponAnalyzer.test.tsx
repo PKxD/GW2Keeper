@@ -134,9 +134,12 @@ describe('WeaponAnalyzer Component', () => {
         fireEvent.click(screen.getByTestId('analyze-button'));
 
         await waitFor(() => {
-            const outputElement = screen.getByTestId('output');
             expect(gw2Api.saveItemCache).toHaveBeenCalled();
         });
+        // Show console to access output
+        const showConsoleBtn = screen.getByRole('button', { name: /Show Console/ });
+        fireEvent.click(showConsoleBtn);
+        const outputElement = screen.getByTestId('output');
     });
 
     it('should save API key to localStorage when option checked', async () => {
