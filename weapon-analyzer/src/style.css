@@ -173,7 +173,7 @@ main {
 }
 
 .settings h3::before {
-	content: '⚙️';
+	display: none;
 }
 
 .form-grid {
@@ -457,7 +457,7 @@ main {
 }
 
 .template h4::before {
-	content: '📋';
+	display: none;
 }
 
 /* Items Grid */
@@ -536,7 +536,7 @@ main {
 }
 
 .weapon-counts h3::before {
-	content: '📊';
+	display: none;
 }
 
 .counts {

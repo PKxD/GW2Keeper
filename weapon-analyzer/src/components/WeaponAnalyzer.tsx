@@ -238,7 +238,7 @@ const WeaponAnalyzer: React.FC = () => {
 
 	return (
 		<div className="weapon-analyzer">
-			<h2>🗡️ Guild Wars 2 Weapon Analyzer</h2>
+			<h2>Guild Wars 2 Weapon Analyzer</h2>
 			<p className="subtitle">Analyze weapon usage across your characters' equipment templates</p>
 
 			<div className="settings">
@@ -311,11 +311,11 @@ const WeaponAnalyzer: React.FC = () => {
 								onClick={analyzeWeapons}
 								disabled={isLoading}
 							>
-								{isLoading ? 'Analyzing...' : '🚀 Analyze Weapons'}
+								{isLoading ? 'Analyzing...' : 'Analyze Weapons'}
 							</button>
 							{saveKey && (
 								<button className="btn btn-danger" onClick={forgetApiKey}>
-									🗑️ Forget API Key
+									Forget API Key
 								</button>
 							)}
 						</div>
