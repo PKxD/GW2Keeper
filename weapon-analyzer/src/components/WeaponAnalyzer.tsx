@@ -247,7 +247,7 @@ const WeaponAnalyzer: React.FC = () => {
 					<div className="form-group full-width">
 						<label htmlFor="apiKey">API Key</label>
 						<input
-							type="text"
+							type="password"
 							id="apiKey"
 							value={apiKey}
 							onChange={e => setApiKey(e.target.value)}
