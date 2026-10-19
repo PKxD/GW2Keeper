@@ -566,6 +566,14 @@ main {
 }
 
 /* Output Container */
+.console-section {
+	margin-top: 1.5rem;
+}
+
+.btn-toggle-console {
+	margin-bottom: 0.5rem;
+}
+
 .output-container {
 	background: var(--bg-card);
 	border: 1px solid var(--border-color);
@@ -574,22 +582,15 @@ main {
 	box-shadow: var(--shadow-md);
 }
 
-.output-container h3 {
-	margin-top: 0;
-	margin-bottom: 1rem;
-	font-size: 1.1rem;
-	color: var(--text-primary);
-}
-
 #output {
 	background: var(--bg-tertiary);
-	padding: 1rem 1.25rem;
+	padding: 1.25rem;
 	border-radius: var(--radius-sm);
-	max-height: 500px;
+	max-height: 400px;
 	overflow-y: auto;
 	font-family: 'Fira Code', 'JetBrains Mono', 'SF Mono', monospace;
-	font-size: 0.875rem;
-	line-height: 1.7;
+	font-size: 0.85rem;
+	line-height: 1.6;
 	white-space: pre-wrap;
 	color: var(--text-secondary);
 	border: 1px solid var(--border-color);

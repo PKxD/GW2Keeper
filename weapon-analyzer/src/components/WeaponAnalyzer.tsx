@@ -34,6 +34,7 @@ const WeaponAnalyzer: React.FC = () => {
 	const [characters, setCharacters] = useState<CharacterData[]>([]);
 	const [weaponCounts, setWeaponCounts] = useState<WeaponTypeCount[]>([]);
 	const [activeCharacterIndex, setActiveCharacterIndex] = useState<number>(0);
+	const [showConsole, setShowConsole] = useState<boolean>(false);
 	const outputRef = useRef<HTMLPreElement>(null);
 
 	useEffect(() => {
@@ -389,12 +390,16 @@ const WeaponAnalyzer: React.FC = () => {
 						</div>
 					)}
 
-					{output && (
-						<div className="output-container">
-							<h3>Console Output</h3>
-							<pre id="output" ref={outputRef}>{output}</pre>
-						</div>
-					)}
+					<div className="console-section">
+						<button className="btn btn-toggle-console" onClick={() => setShowConsole(!showConsole)}>
+							{showConsole ? 'Hide Console' : 'Show Console'} ({output.split('\n').filter(l => l.trim()).length} lines)
+						</button>
+						{showConsole && output && (
+							<div className="output-container">
+								<pre id="output" ref={outputRef}>{output}</pre>
+							</div>
+						)}
+					</div>
 				</>
 			)}
 		</div>
