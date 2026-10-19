@@ -61,11 +61,12 @@ export async function loadLegendaryItems(apiKey: string): Promise<LegendaryItems
     
     
     
+    const gen3_5Items = [103815, 105653, 106273, 110020];
     const legendaryItemsByGen: LegendaryItemsByGen = {
         '1': filteredItems.filter(item => item.id < 71383).map(item => item.id),
         '2': filteredItems.filter(item => item.id <= 90551 && item.id > 71383).map(item => item.id),
         '3': filteredItems.filter(item => item.id < 103815 && item.id > 90551).map(item => item.id),
-        '3_5': filteredItems.filter(item => item.id === 103815).map(item => item.id)
+        '3_5': filteredItems.filter(item => gen3_5Items.includes(item.id)).map(item => item.id)
     };
 
     console.table(legendaryItemsByGen);
